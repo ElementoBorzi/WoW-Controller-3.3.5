@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: ControllerMod
+## Author: ElementoBorzi
+## Notes: Controller support for 3.3.5
+## SavedVariables: ControllerMod
+
+ControllerMod.lua
