@@ -17,6 +17,7 @@ In development, Wow Controller 3.3.5a does not offer native controller support (
 
 ### Keybinds / Profiles
 ESC -> Key Bindings -> Controller Mod
+
 ![](https://i.gyazo.com/ace27b2a59a911a71f9edf2ea2fd7998.png)
 
 [XPadder](https://www.xpadder.com/ "XPadder") @ https://github.com/ElementoBorzi/WoW-Controller-3.3.5/blob/main/Profiles/Wow_Xbox_360.xpaddercontroller
