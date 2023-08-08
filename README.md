@@ -3,12 +3,12 @@ In development, Wow Controller 3.3.5a does not offer native controller support (
 
 ### Features
 * Supported Frames:
-* QuestFrame
-* GossipFrame
+  * QuestFrame
+  * GossipFrame
 
 * New LUA API:
-* InteractNearest()
-* SetCursorPosition(x, y)
+  * InteractNearest()
+  * SetCursorPosition(x, y)
 
 ### Installation
 1. Move Patcher.exe to WoW folder and run it.
