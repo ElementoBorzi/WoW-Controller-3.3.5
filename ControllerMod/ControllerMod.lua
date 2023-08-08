@@ -3,6 +3,7 @@ ControllerMod = {}
 S_BUTTON = nil;
 
 BINDING_HEADER_CONTROLLERMOD = "Controller Mod"
+BINDING_NAME_START = "Start"
 BINDING_NAME_INTERACT = "Interact"
 BINDING_NAME_BACK = "Back"
 BINDING_NAME_LEFT = "Left"
@@ -11,7 +12,7 @@ BINDING_NAME_UP = "Up"
 BINDING_NAME_DOWN = "Down"
 
 StaticPopupDialogs["POPUP_EXTENSIONS"] = {
-    text = "Couldn\'t load |cffFF8800Extensions.dll|r.\n\nPlease visit |cffFF8800https://github.com/iElementoBorzi/ControllerMod335|r for more details.",
+    text = "Couldn\'t load |cffFF8800Extensions.dll|r.\n\nPlease visit |cffFF8800https://github.com/ElementoBorzi/WoW-Controller-3.3.5|r for more details.",
     button1 = "Exit Game",
     OnAccept = function()
         ForceQuit();
@@ -23,7 +24,15 @@ StaticPopupDialogs["POPUP_EXTENSIONS"] = {
 
 -- @iElementoBorzi: button helpers
 function ClickButton()
+    if S_BUTTON == nil then
+        return false
+    elseif S_BUTTON:GetName() == "CharacterMicroButton" then
+        ToggleCharacter("PaperDollFrame");
+        return true
+    end
+
     S_BUTTON:Click();
+    return true
 end
 
 function ClearButton()
@@ -49,6 +58,31 @@ function SetButtonIndex(index)
         SetButton(_G[newButtonName]);
     end
 end
+
+-- @iElementoBorzi: micro button helpers
+MICRO_BUTTONS = { "CharacterMicroButton", "SpellbookMicroButton", "TalentMicroButton", "AchievementMicroButton", "QuestLogMicroButton", "SocialsMicroButton", "PVPMicroButton", "LFDMicroButton", "MainMenuMicroButton", "HelpMicroButton" };
+function SetMicroButton(button)
+    if S_BUTTON == nil then
+        MoveCursor(button);
+        S_BUTTON = button;
+    else
+        ClearButton();
+        SetCursorPosition(0.5, 0.25);
+    end
+end
+
+function SetMicroButtonIndex(index)
+    if S_BUTTON == nil then return end
+    local buttonName = S_BUTTON:GetName();
+    for i, v in ipairs(MICRO_BUTTONS) do
+        if v == buttonName then
+            if _G[MICRO_BUTTONS[i + index]] then
+                SetButton(_G[MICRO_BUTTONS[i + index]]);
+            end
+        end
+    end
+end
+
 
 function MoveCursor(button)
     if button:IsVisible() then
@@ -79,6 +113,7 @@ EVENT_HANDLERS =
 }
 
 -- @iElementoBorzi: binding handlers (Esc -> Key Bindings -> ControllerMod)
+-- sorted by priority
 BINDING_HANDLERS =
 {
     GossipFrame =
@@ -109,6 +144,14 @@ BINDING_HANDLERS =
         Right = { SetButton, "QuestFrameDeclineButton" },
         Up = { ClickButton, "QuestDetailScrollFrameScrollBarScrollUpButton"  },
         Down = { ClickButton, "QuestDetailScrollFrameScrollBarScrollDownButton"  },
+    },
+	
+    WorldFrame =
+    {
+        Start = { SetMicroButton, "CharacterMicroButton"},
+        Interact = { ClickButton },
+        Left = { SetMicroButtonIndex, -1 },
+        Right = { SetMicroButtonIndex, 1 },
     },
 }
 
@@ -141,17 +184,24 @@ function CheckDLL(self)
 end
 
 -- @iElementoBorzi: Bindings.xml handlers
-function ControllerMod_Interact()
-
+function ControllerMod_Start()
     for frame, handler in pairs(BINDING_HANDLERS) do
-        if _G[frame] and _G[frame]:IsVisible() and handler["Interact"] then
-            ControllerMod_Handle(handler["Interact"]);
+        if _G[frame] and _G[frame]:IsVisible() and handler["Start"] then
+            ControllerMod_Handle(handler["Start"]);
             return
         end
     end
-
-    InteractNearest();
 end
+
+function ControllerMod_Interact()
+    for frame, handler in pairs(BINDING_HANDLERS) do
+        if _G[frame] and _G[frame]:IsVisible() and handler["Interact"] then
+            if ControllerMod_Handle(handler["Interact"]) then
+                print("Return")
+                return
+            end
+        end
+    end
 
 function ControllerMod_Back()
     for frame, handler in pairs(BINDING_HANDLERS) do
@@ -196,21 +246,23 @@ end
 function ControllerMod_Handle(handle)
     local fn = handle[1];
     if fn == nil then
-        return
+        return false
     end
 
     -- @iElementoBorzi: handle fn parameter parsing
-    if fn == SetButton then
-        SetButton(_G[handle[2]]);
+    if fn == SetButton or fn == SetMicroButton then
+        return fn(_G[handle[2]]);
     elseif fn == ClickButton then
         if handle[2] then
             _G[handle[2]]:Click();
         else
-            ClickButton(S_BUTTON);
+            return ClickButton(S_BUTTON);
         end
-    elseif fn == SetButtonIndex then
-        SetButtonIndex(handle[2]);
+    elseif fn == SetButtonIndex or fn == SetMicroButtonIndex then
+        return fn(handle[2]);
     else
-        fn();
+        return fn();
     end
+	
+    return false
 end
