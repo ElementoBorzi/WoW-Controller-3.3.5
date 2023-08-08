@@ -6,6 +6,8 @@ BINDING_HEADER_CONTROLLERMOD = "Controller Mod"
 BINDING_NAME_START = "Start"
 BINDING_NAME_INTERACT = "Interact"
 BINDING_NAME_BACK = "Back"
+BINDING_NAME_BUTTON_A = "Button A"
+BINDING_NAME_BUTTON_B = "Button B"
 BINDING_NAME_LEFT = "Left"
 BINDING_NAME_RIGHT = "Right"
 BINDING_NAME_UP = "Up"
@@ -170,8 +172,8 @@ BINDING_HANDLERS =
 {
     GossipFrame =
     {
-        Interact = { ClickButton },
-        Back = { CloseGossip },
+        Button_A = { ClickButton },
+        Button_B = { CloseGossip },
         Left = { SetButton, "GossipTitleButton1" },
         Right = { SetButton, "GossipFrameGreetingGoodbyeButton" },
         Up = { SetButtonIndex, -1 },
@@ -181,7 +183,7 @@ BINDING_HANDLERS =
     QuestFrameGreetingPanel =
     {
         Interact = { ClickButton },
-        Back = { CloseQuest },
+        Button_B = { CloseQuest },
         Left = { SetButton, "QuestTitleButton1" },
         Right = { SetButton, "QuestFrameGreetingGoodbyeButton" },
         Up = { SetButtonIndex, -1 },
@@ -190,8 +192,8 @@ BINDING_HANDLERS =
 
     QuestFrameDetailPanel =
     {
-        Interact = { ClickButton },
-        Back = { CloseQuest },
+        Button_A = { ClickButton },
+        Button_B = { CloseQuest },
         Left = { SetButton, "QuestFrameAcceptButton" },
         Right = { SetButton, "QuestFrameDeclineButton" },
         Up = { ClickButton, "QuestDetailScrollFrameScrollBarScrollUpButton"  },
@@ -200,7 +202,7 @@ BINDING_HANDLERS =
 	
 	ContainerFrame1 =
     {
-        Interact = { ClickButton },
+        Button_A = { ClickButton },
         Left = { SetBagIndex, 1 },
         Right = { SetBagIndex, -1 },
         Up = { SetBagIndex, 4 },
@@ -209,8 +211,9 @@ BINDING_HANDLERS =
 	
     WorldFrame =
     {
-        Start = { SetMicroButton, "CharacterMicroButton"},
-        Interact = { ClickButton },
+        Start = { ClickButton, "MainMenuBarBackpackButton"},
+        Back = { SetMicroButton, "CharacterMicroButton" },
+        Button_A = { ClickButton },
         Left = { SetMicroButtonIndex, -1 },
         Right = { SetMicroButtonIndex, 1 },
     },
@@ -224,6 +227,9 @@ ContainerFrame1:HookScript("OnShow", function(self)
     _G["CharacterBag3Slot"]:Click();
 end)
 
+ContainerFrame1:HookScript("OnHide", function(self)
+    ClearButton();
+end)
 
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
@@ -263,9 +269,19 @@ function ControllerMod_Start()
     end
 end
 
-function ControllerMod_Interact()
+function ControllerMod_Back()
+    if _G[frame] and _G[frame]:IsVisible() and handler["Back"] then
+            if ControllerMod_Handle(handler["Back"]) then
+                return
+            end
+        end
+    end
+end
+
+function ControllerMod_Button_A()
     for frame, handler in pairs(BINDING_HANDLERS) do
-        if _G[frame] and _G[frame]:IsVisible() and handler["Interact"] then
+        if _G[frame] and _G[frame]:IsVisible() and handler["Button_A"] then
+            if ControllerMod_Handle(handler["Button_A"]) then
             if ControllerMod_Handle(handler["Interact"]) then
                 print("Return")
                 return
@@ -273,10 +289,10 @@ function ControllerMod_Interact()
         end
     end
 
-function ControllerMod_Back()
+function ControllerMod_Button_B()
     for frame, handler in pairs(BINDING_HANDLERS) do
-        if _G[frame] and _G[frame]:IsVisible() and handler["Back"] then
-            ControllerMod_Handle(handler["Back"]);
+        if _G[frame] and _G[frame]:IsVisible() and handler["Button_B"] then
+            ControllerMod_Handle(handler["Button_B"]);
         end
     end    
 end
